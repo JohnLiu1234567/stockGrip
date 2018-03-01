@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dao.StockShDao">
+	<resultMap id="BaseResultMap" type="com.pojo.StockShA">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="code" property="code" jdbcType="VARCHAR" />
+		<result column="type" property="type" jdbcType="VARCHAR" />
+		<result column="price" property="price" jdbcType="DOUBLE" />
+		<result column="info" property="info" jdbcType="VARCHAR" />
+		<result column="exchange" property="exchange" jdbcType="VARCHAR" />
+	</resultMap>
+	<resultMap id="SpecialResultMap" type="com.pojo.StockShA">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="code" property="code" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="DOUBLE" />
+		<result column="price" property="price" jdbcType="DOUBLE" />
+		<result column="pricechange" property="pricechange" jdbcType="DOUBLE" />
+		<result column="yesterday" property="yesterday" jdbcType="DOUBLE" />
+		<result column="percent" property="percent" jdbcType="VARCHAR" />
+		<result column="swing" property="swing" jdbcType="VARCHAR" />
+		<result column="start" property="start" jdbcType="DOUBLE" />
+		<result column="max" property="max" jdbcType="DOUBLE" />
+		<result column="min" property="min" jdbcType="DOUBLE" />
+		<result column="volume" property="volume" jdbcType="VARCHAR" />
+		<result column="turnvolume" property="turnvolume" jdbcType="VARCHAR" />
+		<result column="info" property="info" jdbcType="VARCHAR" />
+		<result column="exchange" property="exchange" jdbcType="VARCHAR" />
+		<result column="state" property="state" jdbcType="VARCHAR" />
+	</resultMap>
+	<!--  resultMap="BaseResultMap" -->
+	<select id="findStockA" resultType="com.pojo.StockShA">
+		SELECT * FROM StockShA
+		<where>
+		<if test="id != null">
+			id = #{id}
+		</if>
+		<if test="code != null">
+			and code = #{code}
+		</if>
+		<if test="name != null">
+			and name = #{name}
+		</if>
+		</where>
+	</select>
+	
+	<select id="findStockAAll" resultMap="SpecialResultMap">
+		select * FROM StockShA
+		<where>
+			1=1
+			<if test="type != null">
+				and type = #{type}
+			</if>
+			<if test="exchange != null">
+				and exchange = #{exchange}
+			</if>
+			<if test="state != null">
+				and state = #{state}
+			</if>
+		</where>
+		<if test="way != null">
+			<if test="way = 'code'">
+				ORDER BY code DESC
+			</if>
+			<if test="way = 'name'">
+				ORDER BY name DESC
+			</if>
+		</if>
+	</select>
+	
+	<select id="findStockASearch" resultMap="SpecialResultMap">
+		select * FROM StockShA
+		<where>
+			<if test="type != null">
+				type = #{type}
+			</if>
+			<if test="exchange != null">
+				AND exchange = #{exchange}
+			</if>
+			<if test="state != state">
+				AND state = #{state}
+			</if>
+			<if test="name != state">
+				OR name LIKE "%${name}%"
+			</if>
+			<if test="code != code">
+				OR code LIKE "%${code}%"
+			</if>
+			<if test="info != info">
+				OR info LIKE "%${info}%"
+			</if>
+		</where>
+		<if test="way != null">
+			<if test="way == code">
+				ORDER BY code DESC
+			</if>
+			<if test="way == name">
+				ORDER BY name DESC
+			</if>
+		</if>
+	</select>
+	
+	<insert id="addStockA">
+		INSERT INTO StockShA
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="stock.id != null">
+				id,
+			</if>
+			<if test="stock.type != null">
+				type,
+			</if>
+			<if test="stock.name != null">
+				name,
+			</if>
+			<if test="stock.code != null">
+				code,
+			</if>
+			<if test="stock.price != null">
+				price,
+			</if>
+			<if test="stock.pricechange != null">
+				pricechange,
+			</if>
+			<if test="stock.percent != null">
+				percent,
+			</if>
+			<if test="stock.swing != null">
+				swing,
+			</if>
+			<if test="stock.volume != null">
+				volume,
+			</if>
+			<if test="stock.turnvolume != null">
+				turnvolume,
+			</if>
+			<if test="stock.yesterday != null">
+				yesterday,
+			</if>
+			<if test="stock.start != null">
+				start,
+			</if>
+			<if test="stock.max != null">
+				max,
+			</if>
+			<if test="stock.min != null">
+				min,
+			</if>
+			<if test="stock.exchange != null">
+				exchange,
+			</if>
+			<if test="stock.info != null">
+				info,
+			</if>
+			<if test="stock.state != null">
+				state,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="stock.id != null">
+				#{stock.id,jdbcType=VARCHAR},
+			</if>
+			<if test="stock.type != null">
+				#{stock.type,jdbcType=VARCHAR},
+			</if>
+			<if test="stock.name != null">
+				#{stock.name,jdbcType=VARCHAR},
+			</if>
+			<if test="stock.code != null">
+				#{stock.code,jdbcType=VARCHAR},
+			</if>
+			<if test="stock.price != null">
+				#{stock.price,jdbcType=DOUBLE},
+			</if>
+			<if test="stock.pricechange != null">
+				#{stock.pricechange,jdbcType=DOUBLE},
+			</if>
+			<if test="stock.percent != null">
+				#{stock.percent,jdbcType=VARCHAR},
+			</if>
+			<if test="stock.swing != null">
+				#{stock.swing,jdbcType=VARCHAR},
+			</if>
+			<if test="stock.volume != null">
+				#{stock.volume,jdbcType=VARCHAR},
+			</if>
+			<if test="stock.turnvolume != null">
+				#{stock.turnvolume,jdbcType=VARCHAR},
+			</if>
+			<if test="stock.yesterday != null">
+				#{stock.yesterday,jdbcType=DOUBLE},
+			</if>
+			<if test="stock.start != null">
+				#{stock.start,jdbcType=DOUBLE},
+			</if>
+			<if test="stock.max != null">
+				#{stock.max,jdbcType=DOUBLE},
+			</if>
+			<if test="stock.min != null">
+				#{stock.min,jdbcType=DOUBLE},
+			</if>
+			<if test="stock.exchange != null">
+				#{stock.exchange,jdbcType=VARCHAR},
+			</if>
+			<if test="stock.info != null">
+				#{stock.info,jdbcType=VARCHAR},
+			</if>
+			<if test="stock.state != null">
+				#{stock.state,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	
+	<update id="updateStockA">
+		UPDATE StockShA
+		<set>
+			<if test="stock.type != null">
+				type=#{stock.type}
+			</if>
+			<if test="stock.name != null">
+				name=#{stock.name}
+			</if>
+			<if test="stock.code != null">
+				code=#{stock.code}
+			</if>
+			<if test="stock.price != null">
+				price=#{stock.price}
+			</if>
+			<if test="stock.pricechange != null">
+				pricechange=#{stock.pricechange}
+			</if>
+			<if test="stock.percent != null">
+				percent=#{stock.percent}
+			</if>
+			<if test="stock.swing != null">
+				swing=#{stock.swing}
+			</if>
+			<if test="stock.volume != null">
+				volume=#{stock.volume}
+			</if>
+			<if test="stock.turnvolume != null">
+				turnvolume=#{stock.turnvolume}
+			</if>
+			<if test="stock.yesterday != null">
+				yesterday=#{stock.yesterday}
+			</if>
+			<if test="stock.start != null">
+				start=#{stock.start}
+			</if>
+			<if test="stock.max != null">
+				max=#{stock.max}
+			</if>
+			<if test="stock.min != null">
+				min=#{stock.min}
+			</if>
+			<if test="stock.exchange != null">
+				exchange=#{stock.exchange}
+			</if>
+			<if test="stock.info != null">
+				info=#{stock.info}
+			</if>
+			<if test="stock.state != null">
+				state=#{stock.state}
+			</if>
+		</set>
+	</update>
+	
+	<delete id="deleteStockA">
+		DELETE * FROM StockShA WHERE id=#{id}
+	</delete>
+</mapper>

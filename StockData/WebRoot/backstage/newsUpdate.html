@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>newsUpdate.html</title>
+	
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style type="text/css">
+    	.header{width:100%;height:80px;}
+    	.nav{min-width:150px;max-width:400px;width:15%;min-height:600px;margin:4px 10px 0 0;}
+    	.iframe1{width:100%;height:100%;}
+    	#middle{display:flex;}
+    	#rmiddle{min-width:100%-200px;max-width:100%-400px;width:80%}
+    	#t_news{width:1100px;border:solid 1px;}
+    	#t_news tr{height:50px;}
+    	#t_news td.td1{height:50px;text-align: center;border:solid 1px;}
+    	#t_news tr td{height:50px;border:solid 1px;}
+    	#context{max-width:900px;}
+    	#tag{width:200px;}
+    	.input_text{width:90%;height:40px;}
+    	.button1{width:100px;height:40px;overflow: hidden;}
+    	.imgbox{position:relative;display:table;width:600px;}
+    	.buttonUpload{width:72px;height:24px;overflow: hidden;float:left;}
+    	.s7{width:500px;}
+    	.s8{position:relative;width:500px;overflow: hidden;}
+    </style>
+    <!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
+	<script type="text/javascript" src="/diamond/backstage/js/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" charset="utf-8" src="/diamond/js/ueditor1.4.3.3/utf8-jsp/ueditor.config.js"></script>
+    <script type="text/javascript" charset="utf-8" src="/diamond/js/ueditor1.4.3.3/utf8-jsp/ueditor.all.min.js"> </script>
+	<script type="text/javascript">
+		
+		var id = window.location.search.substr(4);
+		var title = "";
+		console.log("id="+id);
+		var ue;							//富文本内容
+		
+		function init(){
+			ue = UE.getEditor('context', {
+	    		autoHeight: false,
+	    		//toolbars: [			//按钮
+	        	//	['fullscreen', 'source', 'undo', 'redo', 'bold']
+	    		//],
+	    		autoHeightEnabled: true,
+	    		autoFloatEnabled: true,
+			});
+			$.ajax({
+				type:"post",
+				url:"/diamond/backstage/news/findnews.action",
+				data:{id:id},
+				datatype:"text",
+				success:function(data){
+					data = eval("("+data+")");
+					console.log(data);
+					if(data.code!="1000"){
+						$("#message").text(data.msg);
+					}else{
+						id = data.json.id;
+						title = data.json.title;
+						$("#idtitle").append(
+						"<input type='hidden' id='id' name='id' value='"+id+"'>");
+						$("#title").val(title);
+						$("#info").val(data.json.info);
+						//$("#context").val();
+		    			$("#author").val(data.json.author);
+		    			$("#tag").val(data.json.tag);
+		    			//初始化内容
+		    			ue.ready(function(){
+		    				//设置编辑器的内容
+		    	    		ue.setContent(data.json.context);
+		    	    		//获取html内容
+		    	    		var html = ue.getContent();
+		    	    		//获取纯文本内容，返回:
+		    	    		var txt = ue.getContentTxt();
+		    			});
+					}
+				}
+			});
+			
+		}
+		
+				
+		function changeText(){
+			var info = $("#info").val();
+			var detail = $("#detail").val();
+			/*var reg1=new RegExp("<br/>","g");
+			info= info.replace(reg1,"\n");
+			detail=detail.replace(reg1,"\n");
+			$("#info").val(info);
+			$("#detail").val(detail); */
+			if(detail.indexOf("<br/>") >= 0){
+				alert("f");
+				return false;
+			}else{
+				alert("t");
+				return true;
+			}
+		};
+		
+		
+		function check(){
+			
+			var title = $("#title").val();
+			var info = $("#info").val();
+			var context = ue.getContent();
+			var author = $("#author").val();
+			var state = $("#state").val();
+			var tag = $("#tag").val();
+			$.ajax({
+				type:"post",
+				url:"/diamond/backstage/news/updatenews.action",
+				data:{id:id,title:title,info:info,context:context,author:author,state:state,tag:tag},
+				datatype:"text",
+				success:function(data){
+					console.log(data);
+					data = eval("("+data+")");
+					console.log(data);
+					if(data.code=="1004"){
+						$("#s1").html(data.msg);
+					}else if(data.code=="10001"){
+						$("#s1").html(data.msg);
+					}else if(data.code=="10002"){
+						$("#s5").text(data.msg);
+					}else if(data.code=="10003"){
+						$("#s5").text(data.msg);
+					}else if(data.code=="1000"){
+						window.location.href = "/diamond/backstage/newsShow.html";
+					}
+				}
+			});
+		}
+		
+		function setImg(){
+			window.location = "newsImg.html?id="+id;
+		}
+	</script>
+  </head>
+  
+  <body onload="init();">
+    <div class="header">
+		<iframe class="iframe1" src="./head/header.html"></iframe>
+	</div>
+	<div id="middle">
+	  	<div class="nav">
+			<iframe class="iframe1" src="./head/nav.html"></iframe>
+		</div>
+	    <div id="rmiddle">
+		    <div id="box">
+		    	<a href="#" onclick="setImg();">前往提交封面（再次提交将会覆盖原封面）</a>
+		    	<form id="form1" action="/diamont/backstage/news/updatenews.action" enctype="multipart/form-data" method="post">
+		    		<div id="idtitle"></div>
+		    		<table id="t_news">
+		    			<tr>
+		    				<td class="td1">标题</td>
+		    				<td id="tr1_td2"><input id="title" name="title" class="input_text"/></td>
+		    				<td id="s1"></td>
+		    			</tr>
+		    			<tr>
+		    				<td class="td1">作者</td>
+		    				<td><input id="author" name="author" class="input_text"/></td>
+		    				<td><span id="s2"></span></td>
+		    			</tr>
+		    			<tr>
+		    				<td class="td1">简介</td>
+		    				<td><input id="info" name="info" class="input_text" placeholder="最多200字"/></td>
+		    				<td><span id="s3"></span></td>
+		    			</tr>
+		    			<tr>
+		    				<td class="td1">详情</td>
+		    				<td><textarea id="context" name="context" rows="12" cols="80" maxlength="5000" placeholder="最多2500字"></textarea></td>
+		    				<td><span id="s4"></span></td>
+		    			</tr>
+		    			<tr>
+		    				<td class="td1">新闻类型</td>
+		    				<td><input id="tag" name="tag" class="input_text"/>
+		    					注意：如果新闻类型填写为“头条”，则该新闻会成为新闻展示列表里的第一个，且只能设一个头条
+		    				</td>
+		    				<td><span id="s5"></span></td>
+		    			</tr>
+		    			<tr>
+		    				<td class="td1">状态</td>
+		    				<td><select id="state" name="state" style="width:100px;height:30px;">
+		    						<option value="未发布">未发布</option>
+		    						<option value="已发布">已发布</option>
+		    					</select>
+		    				</td>
+		    				<td><span id="s6">默认是未发布</span></td>
+		    			</tr>
+		    			<tr>
+		    				<td class="td1"></td>
+		    				<td><input type="button" class="button1" value="提交" onclick="check();"/>
+		    					<input type="button" class="button1" value="取消" onclick="javascript:history.go(-1);"/></td>
+		    				<td></td>
+		    			</tr>
+		    		</table>
+		    	</form>
+		    </div>
+		</div>
+	</div>
+  </body>
+</html>

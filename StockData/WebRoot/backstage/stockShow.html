@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>StockShow.html</title>
+	
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style type="text/css">
+    	.header{width:100%;height:80px;}
+    	.nav{min-width:150px;max-width:400px;width:15%;min-height:600px;margin:4px 10px 0 0;}
+    	.iframe1{width:100%;height:100%;}
+    	.iframe2{width:100%;min-height:600px;height:100%;}
+    	#middle{display:flex;}
+    	#rmiddle{margin:8px;min-width:100%-200px;max-width:100%-400px;width:80%}
+    	#mr_md1{height:30px;margin:5px 0;}
+    	#mr_md2{height:auto;margin:5px 0;}
+    	#t_news{width:1000px;border:solid 1px;}
+    	#t_news tr{height:30px;text-align: center;}
+    	#t_news tr td{height:30px;max-width:200px;text-align: center;border:solid 1px;white-space: nowrap;text-overflow: ellipsis;overflow: hidden;}
+    	td.title{width:150px;max-height:100px;"}
+    	td.info{width:250px;max-height:100px;"}
+    	#mr_md3{left:100px;height:30px;width:400px;margin:5px 0;display:flex;margin:auto;}
+    	#pagetool{position:absolute;height:30px;width:100px;}
+    	.a2{margin:0 5px;}
+    </style>
+    <!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
+	<script type="text/javascript" src="/StockData/backstage/js/jquery-1.7.1.min.js"></script>
+  	<script type="text/javascript">
+  	//var page = 1,size = 10;
+	var totalCount,totalPage;
+		
+	$(document).ready(function(){
+		$("#add").click(function(){
+			window.open("/StockData/stage/stockaadd.html");
+		});
+		$("#del").click(function(){
+			var obj = document.getElementsByName("idlist");
+			var idlist = [];
+			for(var i = 0;i < obj.length;i++){
+				if(obj[i].checked){
+					idlist.push(obj[i].value);
+				}
+			}
+			var idlist1 = idlist+"";
+			window.open("/StockData/backstage/stage/stockadel.action");
+		});
+		
+	});
+	
+	function search1(){
+			
+		var name = $("#name").val();
+		var code = $("#code").val();
+		var type = $("#type").val();
+		var page = $("#page").val();
+		var size = $("#size").val();
+		var state = $("#state").val();
+		$.ajax({
+			type:"post",
+			url:"stock/getstocksha2list.action",
+			data:{name:name,code:code,type:type,state:state,orderWay:"updateDate",page:page,size:size},
+			datatype:"text",
+			success:function(data){
+				data = eval("("+data+")");
+				console.log(data);
+				page = data.page.page;
+				totalCount = data.page.count;
+				totalPage = data.page.total;
+				if(data.user == "null"){
+					window.location = "login.html";
+				}
+				if(data.code != "1000"){
+					$("#message").text(data.msg);
+				}else{
+					var date = new Date(data.json[0].date);
+					$("#message").text(data.msg+" "+"日期："+date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate());
+					$("#t_news").children().remove();
+					$("#t_news").append(
+						"<tr><td>选择</td>" +
+							"<td>代码</td>" +
+		   					"<td>名称</td>"+
+		    				"<td>开盘</td>"+
+		    				"<td class='need'>收盘</td>"+
+		    				"<td>最高</td>"+
+		   					"<td>最低</td>"+
+		    				"<td>成交量</td>"+
+		    				"<td>成交额</td>"+
+		    				"<td>操作</td>"+
+		    			"</tr>");
+					for(var i=0;i<data.json.length;i++){
+						
+						$("#t_news").append(	//date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()
+							"<tr><td><input type='checkbox' name='idlist' value='"+data.json[i].id+"'/></td>" +
+								"<td>"+data.json[i].code+"</td>" +
+		    					"<td>"+data.json[i].name+"</td>"+
+		    					"<td>"+data.json[i].start+"</td>"+
+		    					"<td class='need'>"+data.json[i].end+"</td>"+
+		    					"<td>"+data.json[i].max+"</td>"+
+		    					"<td>"+data.json[i].min+"</td>"+
+		    					"<td>"+data.json[i].volumn+"</td>"+
+		    					"<td>"+data.json[i].turnvolumn+"</td>"+
+		    					"<td><a href='stockDetail.html?code="+data.json[i].code+"'>查看</a></td>"+
+		    				"</tr>");
+					}
+						
+					$("#pager").children().remove();
+					for(var i = 1;i <= data.page.total;i++){
+						if(i > page-5||i < page+5){
+							if(i == page){
+								$("#pager").append(
+									"<span class='current' page-id='"+i+"'>"+i+"</span>");
+							}else{
+								$("#pager").append(
+									"<a page-id='"+i+"' onclick='search1("+i+");'>"+i+"</span>");
+							}
+						}
+					}
+				}
+			}
+		});
+	}
+  		
+  	</script>
+  </head>
+  
+  <body onload="search1();">
+    <div class="header">
+		<iframe class="iframe1" src="./head/header.html"></iframe>
+	</div>
+	<div id="middle">
+	  	<div class="nav">
+			<iframe class="iframe2" src="./head/nav.html"></iframe>
+		</div>
+	    <div id="rmiddle">
+	    	<div id="mr_md1">状态：<span id="message">未取值</span>
+	    		<div style="float:right;margin:0 20px;">
+	    			<input id="newsname"/><input type="button" value="查询" onclick="search();"/>
+	    		</div>
+	    		<div id="toolbar" style="float:right;margin:0 10px;">
+	    			<input id="add" type="button" value="新增"/>
+	    			<input id="del" type="button" value="删除"/>
+	    		</div>
+	    	</div>
+	    	<div id="wraper" class="pagerHtmlWrap"></div>
+	    	<div id="mr_md2">
+		    	<table id="t_news">
+		    		<tr>
+		    			<td>选择</td>
+		    			<td>代码</td>
+		    			<td>名称</td>
+		    			<td>开盘</td>
+		    			<td>收盘</td>
+		    			<td>最高</td>
+		    			<td>最低</td>
+		    			<td>成交量</td>
+		    			<td>成交额</td>
+		    			<td>操作</td>
+		    		</tr>
+		    	</table>
+	    	</div>
+	    	
+	    	<div id="mr_md3">
+	    		<div style="text-align: center;margin:20px auto;">
+	    			<div id="pager" class="pager clearfix">
+	    				
+	    			</div>
+	    		</div>
+	    	</div>
+	    </div>
+    </div>
+  </body>
+</html>

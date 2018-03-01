@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>workDetail.html</title>
+	
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style type="text/css">
+    	.header{width:100%;height:80px;}
+    	.nav{min-width:150px;max-width:400px;width:15%;min-height:600px;margin:4px 10px 0 0;}
+    	.iframe1{width:100%;height:100%;}
+    	.iframe2{width:100%;min-height:600px;}
+    	#middle{display:flex;}
+    	#rmiddle{margin:8px;min-width:100%-200px;max-width:100%-400px;width:80%}
+    	#mr_md1{height:30px;margin:5px 0;}
+    	#mr_md2{height:auto;margin:5px 0;}
+    	#t_news{width:1000px;border:solid 1px;}
+    	#t_news tr{height:50px;text-align: center;}
+    	#t_news tr td{height:50px;max-width:200px;text-align: center;border:solid 1px;white-space: nowrap;text-overflow: ellipsis;overflow: hidden;}
+    	td.title{width:150px;max-height:100px;"}
+    	td.info{width:250px;max-height:100px;"}
+    	#mr_md3{left:100px;height:30px;width:400px;margin:5px 0;display:flex;margin:auto;}
+    	#pagetool{position:absolute;height:30px;width:100px;}
+    	.a2{margin:0 5px;}
+    </style>
+    <!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
+	<script type="text/javascript" src="/StockData/backstage/js/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="/StockData/js/echarts.js"></script>
+	<script type="text/javascript">
+	
+	</script>
+  </head>
+  
+  <body>
+    <div class="header">
+		<iframe class="iframe1" src="./head/header.html"></iframe>
+	</div>
+	<div id="middle">
+	  	<div class="nav">
+			<iframe class="iframe2" src="./head/nav.html"></iframe>
+		</div>
+	    <div id="rmiddle">
+	    	<div id="mr_md1">
+	    		股票列表 > <span id="code"></span><input type="button" id="ret" value="返回" style="float: right;" onclick="history.go(-1);"/><br>
+	    		状态：<span id="message">未取值</span>
+    			<div style="float:right;margin:0 20px;">
+	    			<input id="newsname"/><input type="button" value="查询" onclick="search();"/>
+	    		</div>
+	    		<div id="toolbar" style="float:right;margin:0 10px;">
+	    			<input id="add" type="button" value="新增"/>
+	    			<input id="del" type="button" value="删除"/>
+	    		</div>
+    		</div>
+    		<div id="mr_md2">
+    			设定显示尺寸：<input id="size" type="text" placeholder="10"/><input id="sub" type="button" value="提交" onclick="getF();"/>
+    			<div id="chart1" style="height:500px;width:1000px;">
+    				
+    			</div>
+    		</div>
+    	</div>
+    </div>
+  </body>
+  <script type="text/javascript">
+  	var numx;		//x轴，连续的天数
+  	var numy;		//y轴，出现的次数
+  	// 基于准备好的dom，初始化echarts实例
+	var myChart = echarts.init(document.getElementById('chart1'));
+	
+  	$(document).ready(function(){
+  		
+		// 指定图表的配置项和数据，动态时配置空数据
+		myChart.setOption({
+			title: {
+			    text: '股价变化和持续天数的关系'
+			},
+			tooltip: {},
+			legend: {
+			   data:['次数']
+			},
+			xAxis: {
+				name: '连续天数',
+			    data: []
+			},
+			yAxis: {
+				name: '次数',
+			},
+			series: [{
+			    name: '次数',
+			    type: 'bar',
+			    data: []
+			}]
+		});
+  		getF();
+  	
+  	});
+  	
+  	function getF(){
+  		var code = window.location.search.substr(6);
+  		var type = "";
+  		var choose = "3";
+  		var size = 10;
+  		$("#code").text(code);
+  		console.log("code="+code);
+  		if($("#size").val() != ""){
+  			console.log("size=" + $("#size").val());
+  			size = $("#size").val();
+  		}
+  		$.ajax({
+  			type:"post",
+  			url:"stock/getfrequencebycode.action",
+  			data:{code:code,type:type,choose:choose,orderWay:"updateDate",size:size},
+			//datatype:"text",
+  			success:function(data){
+  				data = eval("("+data+")");
+				console.log(data);
+				if(data.code=="1000"){
+					$("#message").text(data.msg);
+					numx = data.json;
+					numy = data.json2;
+					console.log("numx="+ numx);
+					console.log("numy="+ numy);
+					
+					function fetchData(cb) {
+					    // 通过 setTimeout 模拟异步加载
+					    //setTimeout(function () {
+					        cb({
+					            categories: numx,
+					            data: numy,
+					        });
+					    //}, 1000);
+					}
+					
+					fetchData(function (data) {
+					    console.log(data.categories);
+					    console.log(data.data[1]);
+					    myChart.setOption({
+					        xAxis: {
+					            data: data.categories
+					        },
+					        series: [{
+					            // 根据名字对应到相应的系列
+					            name: '次数',
+					            data: data.data
+					        }]
+					    });
+					});
+					
+			        //动态时在此对需要修改的部分重新定义
+			        /* myChart.setOption({
+			            xAxis: {
+			                data: [data.json]
+			            },
+			            series: [{
+			                name: '次数',
+			                type: 'bar',
+			                data: [data.json2]
+			            }]
+			        }); */
+
+				}
+  			}
+  		});
+  	}
+  		
+	 
+	</script>
+</html>
